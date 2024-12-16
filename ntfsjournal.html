@@ -1,0 +1,315 @@
+<html>
+<head>
+
+<link rel="icon" type="image/ico" href="NTFSjournal.png"></link> 
+<link rel="shortcut icon" href="NTFSjournal.png"></link>
+
+</head>
+<style>
+body { color:black; background-color:#d0d0d0;}
+h1 { color:yellow; background-color: 808080; }
+h3 { color:yellow; background-color: 808080; }
+PRE { background-color:#ffff80; color:black; margin:30px; border:1px solid blue; font-size: 120%; }
+.t { color:blue; font-size: 150%; }
+.n { color:black; font-size: 80%; }
+.s { color:red; font-weight: bold;}
+blockquote { margin:10px; border-style:groove; padding:10px; solid #c0c0c0; }
+
+img#background1
+{
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%:
+  display: block;
+  z-index: -1;
+}
+</style>
+<title> NTFSjournal Aug 10, 2011</title>
+<body>
+<div> <img1 id="background" src="background.jpg"></div>
+<a name="top" /> 
+<p> 
+<a href="../../index.html"> [Back to Main Page] </a> 
+<p>
+<h1><center>NTFSjournal</center></h1>
+<h1> Version </h1>
+  <blockquote>
+  <table> 
+  <tr><td><img src="NTFSjournal.png">
+  <td>&nbsp;
+  <td>
+    <b>Author: Dennis Lang</b>
+    <br>Version: NTFSjournal v1.9
+    <br>Updated:  Dec-2011
+    <br> https://lanenlabs.com
+  </table>
+  </blockquote>
+
+<h1> Download </h1>
+<blockquote>
+ <li>Download v1.9 source code:<a href=ntfsjournal-v1.9-src.zip>  NTFSjournal-v1.9-src.zip  </a>
+ <li>Download v1.9 excutable:<a href=ntfsjournal-x32.exe>  NTFSjournal.exe (32bit)</a>
+ <li>Download v1.9 excutable:<a href=ntfsjournal-x64.exe>  NTFSjournal.exe (64bit)</a>
+</blockquote>
+
+<h1> Intro </h1>
+
+ <b>NTFSjournal</b> is a simple program to list the contents of the Windows NTFS Journal.
+ As of Windows 2000, <a href="http://en.wikipedia.org/wiki/USN_Journal"> NTFS version 3.0 included a journal</a>
+ which tracks a rolling history of file changes.  The Journal can be disabled and its length can be changed using
+ Microsoft's program <b>fsutil</b>.
+ <p>
+ Here is part of the documentation on <b>fsutil</b> (search web for full documentation):
+<pre>
+<h3>Syntax</h3>
+<li>fsutil usn [<b>createjournal</b>] MaximumSize AllocationDelta VolumePathname
+<li>fsutil usn [<b>deletejournal</b>] flags VolumePathname
+<li>fsutil usn [<b>enumdata</b>] FileRef LowUsn HighUsn PathName
+<li>fsutil usn [<b>queryjournal</b>] VolumePathname
+<li>fsutil usn [<b>readdata</b>] PathName
+<h3>Parameters</h3>
+<table>
+<tr><td><b>createjournal</b> <td> Creates a USN change journal.
+<tr><td><b>m=MaximumSize</b> <td> Specifies the maximum size, in bytes, that NTFS allocates for the change journal.
+<tr><td><b>a=AllocationDelta</b> <td> Specifies the size, in bytes, of memory allocation that is added to the end and removed from the beginning of the change journal.
+<tr><td><b>VolumePathname</b> <td> Specifies the drive letter (followed by a colon), mount point, or volume name.
+<tr><td><b>deletejournal</b> <td> Deletes or disables an active USN change journal.
+<tr><td><b>flags</b> <td> /D: Disables an active USN change journal, and returns I/O control while the change journal is being disabled.
+<tr><td><b>VolumePathname</b> <td> Specifies the drive letter (followed by a colon), mount point, or volume name.
+<tr><td><b>enumdata</b> <td> Enumerates and lists the change journal entries between two specified boundaries.
+<tr><td><b>FileRef</b> <td> Ordinal position within the files on the volume at which the enumeration is to begin.
+<tr><td><b>LowUsn</b> <td> Lower boundary of the range of USN values used to filter which records are returned. Only records whose last change journal USN is between or equal to the LowUsn and HighUsn member values are returned.
+<tr><td><b>HighUsn</b> <td> Upper boundary of the range of USN values used to filter which files are returned.
+<tr><td><b>PathName</b> <td> Specifies the drive letter (followed by a colon), mount point, or volume name.
+<tr><td><b>queryjournal</b> <td> Queries a volume's USN data to gather information about the current change journal, its records, and its capacity.
+<tr><td><b>volume pathname</b> <td> Specifies the drive letter (followed by a colon), mount point, or volume name.
+<tr><td><b>readdata</b> <td> Read the USN data for a file.
+<tr><td><b>PathName</b> <td> Specifies the drive letter (followed by a colon), mount point, or volume name.
+</table>
+</pre>
+
+<p>
+<b>NTFSjournal</b> is similar to the directory list command <b>dir</b> and needs a disk drive and optional file pattern.
+<blockquote>
+    Examples:
+    <li>NTFSjournal c:
+    <li>NTFSjournal d:*.log
+    <li>NTFSjournal c:Foo*.txt
+    <li>NTFSjournal c:Events??-Jan-??.txt
+    <li>NTFSjournal c:\windows\system*\*.log
+    <li>NTFSjournal -f *.log -s 1000 -t -1.0 c: d: e:
+    <li>NTFSjournal -F "copy %p \\remote\d$\%f" -f \wxdata\* -f *.dat d: &gt;sync.bat
+    <li>NTFSjournal 
+</blockquote>
+<p>
+Sample output, note the dash lines are sent to standard error, so if you redirect the output you only get the file names.
+<pre>
+> NtfsJournal.exe -f \Windows\* c:*.log
+--- Journal for c:*.log
+\Windows\WindowsUpdate.log
+\Windows\debug\PASSWD.LOG
+\Windows\debug\WIA\wiatrace.log
+\Windows\inf\setupapi.app.log
+\Windows\security\database\edb.log
+\Windows\security\logs\winlogon.log
+\Windows\ServiceProfiles\NetworkService\AppData\Local\Temp\MpCmdRun.log
+\Windows\System32\catroot2\edb.log
+\Windows\Temp\MpCmdRun.log
+\Windows\SoftwareDistribution\ReportingEvents.log
+\Windows\SoftwareDistribution\DataStore\Logs\edb.log
+\Windows\System32\LogFiles\HTTPERR\httperr1.log
+--- 0.749 seconds
+
+
+>  NTFSjournal -t -1 -D -F "%30t,%p"  c:*.log
+--- Journal for c:*.log
+05-Aug-2011 20:30             ,\Program Files (x86)\Symantec\Symantec Endpoint Protection\syslog.log
+06-Aug-2011 11:05             ,\ProgramData\Microsoft\Windows Defender\Scans\History\Service\Unknown.Log
+05-Aug-2011 20:30             ,\ProgramData\Symantec\SRTSP\SrtTxFEvt.log
+05-Aug-2011 21:53             ,\ProgramData\Symantec\Symantec Endpoint Protection\Logs\07222011.Log
+05-Aug-2011 23:48             ,\Windows\WindowsUpdate.log
+05-Aug-2011 20:30             ,\Windows\debug\PASSWD.LOG
+06-Aug-2011 10:34             ,\Windows\inf\setupapi.app.log
+05-Aug-2011 23:48             ,\Windows\security\logs\winlogon.log
+06-Aug-2011 11:08             ,\Windows\ServiceProfiles\NetworkService\AppData\Local\Temp\MpCmdRun.log
+05-Aug-2011 20:30             ,\Windows\System32\catroot2\edb.log
+06-Aug-2011 11:05             ,\Windows\Temp\MpCmdRun.log
+06-Aug-2011 11:10             ,\Windows\SoftwareDistribution\DataStore\Logs\edb.log
+05-Aug-2011 23:48             ,\Users\dlang\AppData\Local\Temp\wmsetup.log
+05-Aug-2011 23:48             ,\ProgramData\Microsoft\Search\Data\Applications\Windows\MSStmp.log
+05-Aug-2011 19:48             ,\Users\dlang\Downloads\pscan_src\Debug\pscan.log
+05-Aug-2011 23:48             ,\Program Files (x86)\Steam\steam.log
+05-Aug-2011 20:30             ,\Program Files (x86)\TeamViewer\Version6\TeamViewer6_Logfile.log
+05-Aug-2011 23:48             ,\Windows\System32\LogFiles\HTTPERR\httperr1.log
+--- 0.78 seconds
+
+>  NTFSjournal -u - -F "copy %p \\remote\d$\%p"  c:*.log  > syncIt.bat
+--- Journal for c:*.log
+--- 0 seconds
+
+> more syncIt.bat
+copy \Windows\WindowsUpdate.log \\remote\d$\\Windows\WindowsUpdate.log
+copy \Windows\debug\PASSWD.LOG \\remote\d$\\Windows\debug\PASSWD.LOG
+copy \Windows\debug\WIA\wiatrace.log \\remote\d$\\Windows\debug\WIA\wiatrace.log
+copy \Windows\inf\setupapi.app.log \\remote\d$\\Windows\inf\setupapi.app.log
+copy \Windows\security\database\edb.log \\remote\d$\\Windows\security\database\edb.log
+copy \Windows\security\logs\winlogon.log \\remote\d$\\Windows\security\logs\winlogon.log
+
+</pre>
+The wildcard engine only support ? and *, but allows the wildcard
+characters to appear multiple times, in the both the filename and directories.
+<blockquote>
+    Examples:
+    <table border=1 cellpadding=3 cellspacing=1 rules=cols>
+    <tr bgcolor=#b0b0b0><th>Pattern         <th> Results
+    <tr><td>*               <td> All files
+    <tr><td>???             <td> File with 3 characters
+    <tr><td>*.txt           <td> Files ending with .txt
+    <tr><td>c:\*\log\*.txt  <td> Files ending with .txt in a subdirectory \log
+    <tr><td>c:\Windows\System*\*.log    <td> Files ending with .log and in subdirectory starting with \Windows\System
+    </table>
+</blockquote>
+<p>
+<b>NTFSjournal</b> includes several optional arguments to control the <b>filtering</b> and <b>presentation</b>.
+<h3>Filtering</h3>
+When you use multile filters, only files which match <b>ALL</b> the rules will be reported. 
+So, if you filter on file name and time both have to be true for the file to be reported.
+One example is to filter on directory path and file name.
+<p>
+NTFSjournal -f \windows\*  -f *.log  c:
+<p>
+Note - the following will always fail because they both filter on the file extension:
+<br>
+NTFSjournal -f *.log -f *.txt c:
+<p>
+<blockquote>
+    <table border=1 cellpadding=3 cellspacing=1 rules=all> 
+    <tr bgcolor=#b0b0b0><th>Command         <th> Description
+    <tr><td>-d  <td> Show details. By default duplicate file entries are merged. Use -d to see all the gory details.
+    <tr><td>-f &lt;fileFilter&gt;       <td> Use -f to define file filters using wildcards.
+                                        <br> Identical file filter commands:
+                                        <br> &nbsp;&nbsp; NTFSjournal -f *.log  c:    
+                                        <br> &nbsp;&nbsp; NTFSjournal c:*.log
+                                        <br> Example with file filter applied to multiple drives.
+                                        <br> &nbsp;&nbsp; NTFSjournal -f *.log  c: d:
+    <tr><td>-r &lt;changeReasonFilter&gt;   <td> Filter by change <b>reason</b>.
+                                        <br>Reasons Keywords:
+                                        <br> &nbsp;&nbsp; overwrite, extend, truncate,
+                                               create, delete, rename,
+                                               security, basic, link
+                                        <br>Examples:
+                                        <br> &nbsp;&nbsp; NTFSjournal -r overwrite+extend+truncate  c:
+                                        <br> &nbsp;&nbsp; NTFSjournal -r create+delete+rename c:*.log
+                                        <br>Defaults is:  overwrite+extend+truncate+create+delete
+
+
+    <tr><td>-s &lt;size&gt;             <td> Filter by file <b>size</b>
+                                        <br> Show files greater than 1000 bytes on d drive.
+                                        <br> &nbsp;&nbsp; NTFSjournal -s 1000 d:
+                                        <br> Show files less than 2000 bytes on c drive.
+                                        <br> &nbsp;&nbsp; NTFSjournal -s -2000 c: 
+                                        <br><span class='s'>NOTE: Currently the size is rarely populated because it is expensive to acquire (disk fetch per file). </span>
+
+    <tr><td>-t &lt;relativeModifyDate&gt;   <td> Filter by <b>Modify Time</b>, value is relative days.
+                                <br> Modified in the last 2.5 days and ending in .log on c drive. 
+                                <br> &nbsp;&nbsp; NTFSjournal -t -2.5 -f *.log    
+                                <br> Modified more than 7 days ago on e drive. 
+                                <br> &nbsp;&nbsp; NTFSjournal -t +7 e:           
+
+
+    <tr><td>-u &lt;usn&gt;      <td> Start scan with usn number, see -U
+    <tr><td>-u -                <td> Start with previously stored USN in registry.
+                                <br> On exit, last USN is automatically stored in registry.
+                                By using this option you can run NTFSjournal multiple times and limit
+                                the output to just what has chanaged since the last time it was run.
+                                <br> NTFSjournal -f *.log -s 1000 -u - c: d:
+
+    </table>
+</blockquote>
+<p>
+<h3>Presentation</h3>
+<blockquote>
+    <table border=1 cellpadding=3 cellspacing=1 rules=all>   
+    <tr bgcolor=#b0b0b0><th>Command         <th> Description 
+    <tr><td>   -A               <td> Include attributes. R=readonly, H=hidden, S=system, D=directory.
+    <tr><td>   -D               <td> Disable directory part of file path.
+    <tr><td>   -F &lt;fmt&gt;   <td> Format output, %t=time, %s=size, %r=reason,
+                                <br> %p=path(dir+file), %d=directory, %f=file(name+ext)
+                                <br> %n=name, %e=extension
+                                <br> Examples:
+                                <br> &nbsp;&nbsp; NTFSjournal -F "copy %p \\remote\d$\%p" c:*.log &gt; sync.bat
+                                <br> &nbsp;&nbsp; NTFSjournal -F "File:%f Time:%t Size:%s" c:
+                                <br> &nbsp;&nbsp; NTFSjournal -D -F "%30t %f" c:
+    <tr><td>   -R               <td> Include Reason.
+    <tr><td>   -S               <td> Include size.
+                                <br><span class='s'>NOTE: Currently the size is rarely populated because it is expensive to acquire (disk fetch per file). </span>
+    <tr><td>   -T               <td> Include modify time.
+    <tr><td>   -U               <td> Include USN number.
+    </table>
+</blockquote>
+<p>
+<span class='s'>Warning - no guaranties on reliability and completeness of NTFSjournal.</span>
+<p>
+<p>
+Help Banner:
+<pre>
+Ntfs Journal  v1.9 - Aug  9 2011
+By: Dennis Lang
+https://lanenlabs.com
+
+Description:
+  List NTFS Journal which tracks recent file/folder changes.
+  Use 'fsutil usn ...' to create and configure NTFS journal.
+Use:
+   NtfsJournal [options] &lt;localNTFSdrive&gt;...
+ Filter (see examples below):
+   -d                        ; Show detail, by default remove duplicates
+   -f &lt;fileFilter&gt;           ; Filter by filename, use * or ? patterns
+   -r &lt;changeReasonFilter&gt;   ; Filter by change flags
+   -s &lt;size&gt;                 ; Filter by file size
+   -t &lt;relativeModifyDate&gt;   ; Filter by Modify Time, value is relative days
+   -u &lt;usn&gt;                  ; Start scan with usn number, see -U
+   -u -                      ; Start with previously stored USN in registry
+                             ; On exit, last USN is automatically stored in registry
+ Report (what appears in output):
+   -A                        ; Include attributes
+   -D                        ; Disable directory
+   -F &lt;fmt&gt;                  ; format output, %t=time, %s=size, %r=reason,
+                             ; %p=path(dir+filename), %c=drive, %d=directory,
+                             ; %f=filename (name+ext), %n=name, %e=extension
+   -R                        ; Include reason
+   -S                        ; Include size
+   -T                        ; Include modify time
+   -U                        ; Include USN number
+
+ Examples:
+  No filtering:
+    c:                 ; scan c drive, display filenames.
+    -TSA c:            ; scan c drive, display  time, size, attributes.
+  Filter examples (precede 'f' command letter with ! to invert rule):
+    -f *.txt d:        ; files ending in .txt on d: drive
+    -!f *.txt d:       ; files NOT ending in .txt on d: drive
+    -t 2.5 -f *.log    ; modified more than 2.5 days ago and ending in .log on c drive
+    -t -7 e:           ; modified less than 7 days ago on e drive
+    -s 1000 d:         ; size more than 1000 bytes on d drive
+    -s -1000 d: e:     ; size less than 1000 bytes on d and e drive
+                       ; *** NOTE: Size is rarely populated due to performance
+    -f F* c: d:        ; limit scan to files starting with F on either C or D
+    -F "%20t %20s %40p" c: ; Format output
+    -F "copy %p \\remote\d$\data\%f" d:\data\* &gt; sync.bat
+
+  Filter Reasons Keywords:
+       overwrite, extend, truncate
+       create, delete, rename
+       security, basic, link
+  Examples:
+     -r overwrite+extend+truncate  ; File content changes
+     -r create+delete+rename       ; File life changes
+   Defaults is:  overwrite+extend+truncate+create+delete
+</pre>
+
+
+<a href="#top"> Top </a>
+</body>
+</html>
