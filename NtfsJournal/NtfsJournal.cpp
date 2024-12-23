@@ -2,7 +2,7 @@
 // List Windows NTFS Journal.
 //
 // Author:  Dennis Lang   July-2011
-// http://home.comcast.net/~lang.dennis/
+// http://landenlabs.com
 // ------------------------------------------------------------------------------------------------
 
 #include <iostream>
@@ -16,13 +16,13 @@
 #include "Support\FsFilter.h"
 #include "Support\LocaleFmt.h"
 
-#define _VERSION "v3.0"
+#define _VERSION "v3.1"
 
 char sUsage[] =
     "\n"
     "Ntfs Journal  " _VERSION " - " __DATE__ "\n"
     "By: Dennis Lang\n"
-    "https://home.comcast.net/~lang.dennis/\n"
+    "https://landenlabs.com\n"
     "\n"
     "Description:\n"
     "  List NTFS Journal which tracks recent file/folder changes.\n"
