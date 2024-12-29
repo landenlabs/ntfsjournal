@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -157,6 +157,9 @@
     <ClInclude Include="Support\LocaleFmt.h" />
     <ClInclude Include="Support\Pattern.h" />
     <ClInclude Include="Support\SharePtr.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="NtfsJournal.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
