@@ -10,6 +10,8 @@
 #include <iostream>
 
 #include "Ntfs.h"
+#include "fsutil.h"
+#include "winerrhandlers.h"
 
 const wchar_t sSlashStr[] = L"\\";
 
@@ -29,27 +31,48 @@ Ntfs::~Ntfs(void)
 // ------------------------------------------------------------------------------------------------
 bool Ntfs::OpenDrive(wchar_t driveLetter)
 {
+    /* 
+    DWORD error;
+    unsigned phyDrvNum = 0;
+    unsigned partitionNum = 0;
+
+    wchar_t volumePath[] = L"\\\\.\\?:";
+    volumePath[4] = towupper(driveLetter);
+
+    error = FsUtil::GetDriveAndPartitionNumber(volumePath, phyDrvNum, partitionNum);
+    if (error != ERROR_SUCCESS) {
+        std::wcerr << "Error " << WinErrHandlers::ErrorMsg(error).c_str() << std::endl;
+        return error;
+    }
+
+    wchar_t physicalDrive[] = L"\\\\.\\PhysicalDrive0";
+    // ARRAYSIZE includes string terminating null, so backup 2 characters.
+    physicalDrive[ARRAYSIZE(physicalDrive) - 2] += (char)phyDrvNum;
+
+    */
+
     m_drive = driveLetter;
     m_fileInfoCache.clear();
+ 
 
     TCHAR szVolumePath[MAX_PATH];
     wsprintf(szVolumePath, TEXT("\\\\.\\%C:"), m_drive);
-    m_hnd = CreateFile(szVolumePath, GENERIC_READ,
+    m_volHnd = CreateFile(szVolumePath, GENERIC_READ,
         FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 
-    if (m_hnd == INVALID_HANDLE_VALUE) 
+    if (m_volHnd == INVALID_HANDLE_VALUE) 
          SaveLastError();				
 
-    return (m_hnd != INVALID_HANDLE_VALUE);
+    return (m_volHnd != INVALID_HANDLE_VALUE);
 }
 
 // ------------------------------------------------------------------------------------------------
 void Ntfs::CloseDrive()
 {
-    if (m_hnd != INVALID_HANDLE_VALUE) 
+    if (m_volHnd != INVALID_HANDLE_VALUE) 
     {
-        CloseHandle(m_hnd);	
-        m_hnd = INVALID_HANDLE_VALUE;
+        CloseHandle(m_volHnd);	
+        m_volHnd = INVALID_HANDLE_VALUE;
     }
 }
 
@@ -58,19 +81,24 @@ void Ntfs::SaveLastError(DWORD error) const
 {
     if (error == 0)
         error = GetLastError();
+    else if (error == STATUS_INVALID_PARAMETER) {
+        m_errorMsg = L"[0xd]The data is invalid.";
+        return;
+    }
 
-    LPVOID lpMsgBuf;
-    FormatMessageA( 
+    error &= 0x0ffffff;
+
+    wchar_t* lpMsgBuf;
+    FormatMessage( 
         FORMAT_MESSAGE_ALLOCATE_BUFFER | 
         FORMAT_MESSAGE_FROM_SYSTEM | 
         FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL,
         error,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_ENGLISH_AUS),
-        (char*)(LPTSTR) &lpMsgBuf,
+        (LPTSTR)&lpMsgBuf,
         0,
-        NULL
-        );
+        NULL );
 
     wchar_t msg[MAX_PATH];
     wsprintf(msg, TEXT("[0x%x]%s"), error, (TCHAR*)lpMsgBuf);
@@ -87,7 +115,7 @@ bool Ntfs::HasJournal() const
 
 
 // ------------------------------------------------------------------------------------------------
-bool Ntfs::GetJournal(HandleRecordCb handleCb, void* cbData, USN startUsn, DWORD filter)
+bool Ntfs::GetJournal(HandleRecordCb handleCb, void* cbData, USN startUsn, DWORD filter, bool getFileLength, bool getFullPath)
 {
     USN_JOURNAL_DATA usnJournalData;
 
@@ -102,7 +130,8 @@ bool Ntfs::GetJournal(HandleRecordCb handleCb, void* cbData, USN startUsn, DWORD
         usnJournalData.UsnJournalID,
         handleCb, 
         cbData,
-        NULL))
+        NULL,
+        getFileLength, getFullPath))
     {
         // usn is populated with USN after records processed.
     }
@@ -111,7 +140,7 @@ bool Ntfs::GetJournal(HandleRecordCb handleCb, void* cbData, USN startUsn, DWORD
 }
 
 // ------------------------------------------------------------------------------------------------
-bool Ntfs::GetJournal(JournalList& list, USN startUsn, DWORD filter)
+bool Ntfs::GetJournal(JournalList& list, USN startUsn, DWORD filter, bool getFileLength, bool getFullPath)
 {
 	USN_JOURNAL_DATA usnJournalData;
 
@@ -125,7 +154,7 @@ bool Ntfs::GetJournal(JournalList& list, USN startUsn, DWORD filter)
         m_nextUsn,
         usnJournalData.UsnJournalID,
         NULL, NULL,
-        &list))
+        &list, getFileLength, getFullPath))
     {
         // usn is populated with USN after records processed.
     }
@@ -168,7 +197,21 @@ void Ntfs::SetFilter(UsnFilter filter)
 bool Ntfs::QueryJournal(USN_JOURNAL_DATA& usnJournalData) const
 {
     DWORD cb;
-    bool ok = (TRUE == DeviceIoControl(m_hnd, FSCTL_QUERY_USN_JOURNAL, NULL, 0, 
+
+    /* 
+    USN_JOURNAL_DATA_V0  v0;
+    USN_JOURNAL_DATA_V1  v1;
+    USN_JOURNAL_DATA_V2  v2;
+
+    bool ok0 = (TRUE == DeviceIoControl(m_hnd, FSCTL_QUERY_USN_JOURNAL, NULL, 0,
+        &v0, sizeof(v0), &cb, NULL));
+    bool ok1 = (TRUE == DeviceIoControl(m_hnd, FSCTL_QUERY_USN_JOURNAL, NULL, 0,
+        &v1, sizeof(v1), &cb, NULL));
+    bool ok2 = (TRUE == DeviceIoControl(m_hnd, FSCTL_QUERY_USN_JOURNAL, NULL, 0,
+        &v2, sizeof(v2), &cb, NULL));
+    */
+
+    bool ok = (TRUE == DeviceIoControl(m_volHnd, FSCTL_QUERY_USN_JOURNAL, NULL, 0, 
         &usnJournalData, sizeof(usnJournalData), &cb, NULL));
 
     if (!ok) 
@@ -184,6 +227,8 @@ bool Ntfs::ReadJournal(
         HandleRecordCb handleCb,
         void* cbData,
         JournalList* pList, 
+        bool getFileLength,
+        bool getFullPath,
         unsigned maxRecords)
 {
     BOOL retval = TRUE;
@@ -194,15 +239,27 @@ bool Ntfs::ReadJournal(
     m_buffer.resize(sizeof(USN) + sizeof(USN_RECORD) * maxRecords);
     byte* pBuffer = &m_buffer[0];
 
+    /*
+    *      READ_USN_JOURNAL_DATA
+                USN StartUsn;
+                DWORD ReasonMask;
+                DWORD ReturnOnlyOnClose;
+                DWORDLONG Timeout;
+                DWORDLONG BytesToWaitFor;
+                DWORDLONG UsnJournalID;
+                WORD   MinMajorVersion;
+                WORD   MaxMajorVersion;
+    */
     READ_USN_JOURNAL_DATA usnData;
     ZeroMemory(&usnData, sizeof(usnData));
     usnData.StartUsn        = usn;		
     usnData.ReasonMask      = m_filter;	
     usnData.UsnJournalID    = UsnJournalID; 
     usnData.BytesToWaitFor  = 0;    // m_buffer.capacity();
+    usnData.MaxMajorVersion = 2;
 
     // Get some records from the journal
-    retval = DeviceIoControl(m_hnd, FSCTL_READ_USN_JOURNAL, &usnData, sizeof(usnData), 
+    retval = DeviceIoControl(m_volHnd, FSCTL_READ_USN_JOURNAL, &usnData, sizeof(usnData), 
             pBuffer, (DWORD)m_buffer.capacity(), &bytesRead, NULL);
 
     // We are finished if DeviceIoControl fails, or the number of bytes
@@ -212,6 +269,8 @@ bool Ntfs::ReadJournal(
         SaveLastError();
         return false;
     }
+
+    GetInfo getFileInfo = (getFileLength ? eGetLength : eGetPath);
 
     // Pass USN to resume reading to caller.
     usn = *(USN*)pBuffer;
@@ -229,6 +288,15 @@ bool Ntfs::ReadJournal(
         wcsncpy_s(szFile, MAX_PATH, pszFileName, cFileName);
         szFile[cFileName] = 0;
 
+        /*
+        	    USN				m_usn;
+	            DWORD			m_reason;
+	            DWORDLONG		m_fileId;
+	            LARGE_INTEGER	m_timestamp;
+                LARGE_INTEGER   m_length;
+                DWORD           m_fileAttr;
+	            wstring			m_filename;
+        */
         record.m_filename.clear();
         record.m_usn        = pUsnRecord->Usn;
         record.m_reason     = pUsnRecord->Reason;
@@ -237,17 +305,27 @@ bool Ntfs::ReadJournal(
         record.m_fileAttr   = pUsnRecord->FileAttributes;
         record.m_length.QuadPart = 0;
 
-        if (GetDirInfo(pUsnRecord->ParentFileReferenceNumber, record.m_filename))
+        if (getFullPath || getFileLength) 
+        { 
+            if ((record.m_fileAttr & FILE_ATTRIBUTE_DIRECTORY)) 
+            {
+                if (GetDirInfo(pUsnRecord->ParentFileReferenceNumber, record.m_filename)) {
+                    record.m_filename = record.m_filename + sSlashStr + szFile;
+                    record.m_length.QuadPart = 0;   // TODO - populate file length !
+                } else {
+                    record.m_filename = szFile;
+                }
+            }
+            else if (!GetFileInfo(pUsnRecord->FileReferenceNumber, getFileInfo, record.m_filename, record.m_length))
+            {
+                // record.m_filename = L"?\\";
+                // record.m_filename = L"";
+                record.m_filename = szFile;
+            }
+        } 
+        else 
         {
-            if (record.m_filename != sSlashStr)
-                record.m_filename += sSlashStr;
-            record.m_filename += szFile;
-            record.m_length.QuadPart = 0;   // TODO - populate file length !
-        }
-        else if (!GetFileInfo(pUsnRecord->FileReferenceNumber, record.m_filename, record.m_length))
-        {
-            // record.m_filename = L"?\\";
-            record.m_filename = L"";
+            record.m_filename = szFile;
         }
 
         const DWORD eDirectory = 0x10;
@@ -435,17 +513,36 @@ bool Ntfs::GetFileInfo(
 
     static pNtCreateFile NtCreatefile = (pNtCreateFile)GetProcAddress(GetModuleHandle(L"ntdll.dll"), "NtCreateFile");
 
-    UNICODE_STRING fidstr = {8, 8, (PWSTR) &fileId};
-    OBJECT_ATTRIBUTES objAttr = { sizeof(OBJECT_ATTRIBUTES),  m_hnd.m_handle, &fidstr, OBJ_CASE_INSENSITIVE, NULL, NULL };
+    /*
+        UNICODE_STRING 
+            USHORT Length;
+            USHORT MaximumLength;
+            PWSTR  Buffer;
+    */
+    USHORT szFileId = sizeof(fileId);   // ex: 8
+    UNICODE_STRING fidstr = {szFileId, szFileId, (PWSTR) &fileId};
+
+
+    /*  OBJECT_ATTRIBUTES
+            ULONG Length;                   // sizeof(OBJECT_ATTRIBUTES)
+            HANDLE RootDirectory;           // m_volHnd.m_handle
+            PUNICODE_STRING ObjectName;     // &fidstr
+            ULONG Attributes;               // OBJ_CASE_INSENSITIVE
+            PVOID SecurityDescriptor;       // NULL
+            PVOID SecurityQualityOfService; // NULL
+    */
+    OBJECT_ATTRIBUTES objAttr = { sizeof(OBJECT_ATTRIBUTES),  m_volHnd.m_handle, &fidstr, OBJ_CASE_INSENSITIVE, NULL, NULL };
  
-    void* iosb[2] = {0, 0};
+
+    IO_STATUS_BLOCK iosb;
+    ZeroMemory(&iosb, sizeof(iosb));
     HANDLE fHnd;
 
     ULONG status = NtCreatefile(
             &fHnd,                      // FileHandle,
             FILE_READ_ATTRIBUTES,       // DesiredAccess,
             &objAttr,                   // ObjectAttributes,
-            iosb,                       // IoStatusBlock,
+            &iosb,                      // IoStatusBlock,
             NULL,                       // Allocated Size,
             FILE_ATTRIBUTE_NORMAL,      // FileAttributes
             FILE_SHARE_READ | FILE_SHARE_WRITE,  // ShareAccess,
@@ -456,8 +553,8 @@ bool Ntfs::GetFileInfo(
     
     if (NT_ERROR(status))
     {
-        // #define STATUS_INVALID_PARAMETER         ((DWORD   )0xC000000DL)    
-        SaveLastError(status);
+        // STATUS_INVALID_PARAMETER    0xC000000DL    
+        SaveLastError(status);      
         return false;
     }
 

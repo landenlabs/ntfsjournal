@@ -1,8 +1,30 @@
 // ------------------------------------------------------------------------------------------------
-// Time class used to manipulate time.
+// FileSystem Time class used to manipulate time.
 //
 // Author:  Dennis Lang   Apr-2011
 // https://lanenlabs.com
+//
+// ----- License ----
+//
+// Copyright (c) 2014 Dennis Lang
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+// of the Software, and to permit persons to whom the Software is furnished to do
+// so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
 // ------------------------------------------------------------------------------------------------
 
 #pragma once
@@ -42,10 +64,12 @@ public:
             return SecondsToFileTime(time_t(m_seconds));   
         }
 
+#if 0
         operator LARGE_INTEGER () const
         {
             return *(LARGE_INTEGER*)& SecondsToFileTime(time_t(m_seconds));  
         }
+#endif
 
         static TimeSpan Days(double days)
         { return TimeSpan(days * sSecondsPerDay); }
@@ -57,6 +81,11 @@ public:
     };
 };
 
+inline LONGLONG Quad(const LARGE_INTEGER& li)
+{ return li.QuadPart; }
+inline LONGLONG Quad(const FILETIME& li)
+{ return ((LARGE_INTEGER*)&li)->QuadPart; }
+
 //
 // Math operators
 //
@@ -65,7 +94,7 @@ inline FILETIME operator+(const FILETIME& left, const FsTime::TimeSpan& right)
     assert(sizeof(LARGE_INTEGER) == sizeof(FILETIME));
 
     LARGE_INTEGER result;
-    result.QuadPart= ((LARGE_INTEGER*)&left)->QuadPart + LARGE_INTEGER(right).QuadPart;
+    result.QuadPart= Quad(left) + Quad(right);
     return *((FILETIME*)&result);
 }
 
@@ -74,7 +103,7 @@ inline FILETIME operator-(const FILETIME& left, const FsTime::TimeSpan& right)
     assert(sizeof(LARGE_INTEGER) == sizeof(FILETIME));
 
     LARGE_INTEGER result;
-    result.QuadPart= ((LARGE_INTEGER*)&left)->QuadPart - LARGE_INTEGER(right).QuadPart;
+    result.QuadPart= Quad(left) - Quad(right);
     return *((FILETIME*)&result);
 }
 

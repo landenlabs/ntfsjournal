@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="NtfsJournal.cpp" />
-    <ClCompile Include="Ntfs.cpp" />
     <ClCompile Include="Support\LocaleFmt.cpp">
       <Filter>Support</Filter>
     </ClCompile>
@@ -18,9 +17,13 @@
     <ClCompile Include="Support\GetOpts.cpp">
       <Filter>Support</Filter>
     </ClCompile>
+    <ClCompile Include="ntfs\ntfs.cpp" />
+    <ClCompile Include="support\stackwalker.cpp" />
+    <ClCompile Include="support\WinErrHandlers.cpp" />
+    <ClCompile Include="ntfs\ntfsutil.cpp" />
+    <ClCompile Include="support\fsutil.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Ntfs.h" />
     <ClInclude Include="Support\LocaleFmt.h">
       <Filter>Support</Filter>
     </ClInclude>
@@ -45,10 +48,19 @@
     <ClInclude Include="Support\SharePtr.h">
       <Filter>Support</Filter>
     </ClInclude>
+    <ClInclude Include="support\stackwalker.h" />
+    <ClInclude Include="support\WinErrHandlers.h" />
+    <ClInclude Include="ntfs\ntfstypes.h" />
+    <ClInclude Include="ntfs\ntfs.h" />
+    <ClInclude Include="ntfs\ntfsutil.h" />
+    <ClInclude Include="support\fsutil.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Support">
       <UniqueIdentifier>{f4f47c6a-1264-41a4-a772-9b01fb8ee0bf}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="NtfsJournal.rc" />
   </ItemGroup>
 </Project>

@@ -68,15 +68,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir)support;$(ProjectDir)ntfs;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir)support;$(ProjectDir)ntfs;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)support;$(ProjectDir)ntfs;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)support;$(ProjectDir)ntfs;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -89,6 +93,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <UACExecutionLevel>HighestAvailable</UACExecutionLevel>
+      <UACUIAccess>false</UACUIAccess>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -102,6 +108,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <UACExecutionLevel>HighestAvailable</UACExecutionLevel>
+      <UACUIAccess>false</UACUIAccess>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -119,6 +127,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -136,27 +145,42 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Ntfs.cpp" />
-    <ClCompile Include="NtfsJournal.cpp" />
+    <ClCompile Include="NtfsJournal.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)support;$(ProjectDir)ntfs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)support;$(ProjectDir)ntfs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)support;$(ProjectDir)ntfs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)support;$(ProjectDir)ntfs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="ntfs\ntfs.cpp" />
+    <ClCompile Include="ntfs\ntfsutil.cpp" />
     <ClCompile Include="Support\FsFilter.cpp" />
     <ClCompile Include="Support\FsTime.cpp" />
+    <ClCompile Include="support\fsutil.cpp" />
     <ClCompile Include="Support\GetOpts.cpp" />
     <ClCompile Include="Support\LocaleFmt.cpp" />
     <ClCompile Include="Support\Pattern.cpp" />
+    <ClCompile Include="support\stackwalker.cpp" />
+    <ClCompile Include="support\WinErrHandlers.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Ntfs.h" />
+    <ClInclude Include="ntfs\ntfs.h" />
+    <ClInclude Include="ntfs\ntfstypes.h" />
+    <ClInclude Include="ntfs\ntfsutil.h" />
     <ClInclude Include="Support\BaseTypes.h" />
     <ClInclude Include="Support\FsFilter.h" />
     <ClInclude Include="Support\FsTime.h" />
+    <ClInclude Include="support\fsutil.h" />
     <ClInclude Include="Support\GetOpts.h" />
     <ClInclude Include="Support\Hnd.h" />
     <ClInclude Include="Support\LocaleFmt.h" />
     <ClInclude Include="Support\Pattern.h" />
     <ClInclude Include="Support\SharePtr.h" />
+    <ClInclude Include="support\stackwalker.h" />
+    <ClInclude Include="support\WinErrHandlers.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="NtfsJournal.rc" />

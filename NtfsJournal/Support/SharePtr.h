@@ -58,9 +58,11 @@ public:
             assert(m_refCnt == 0);
             assert(m_marker == 123456);
 
-            m_pItem = 0;
             m_refCnt = 0;
             m_marker = 654321;
+            
+            delete m_pItem;
+            m_pItem = 0;
         }
 
         ShareItem* Add() 
@@ -76,20 +78,16 @@ public:
 
 
     bool IsNull() const
-    {
-        return m_pShareItem == NULL || m_pShareItem->m_pItem == NULL;
-    }
+    {  return m_pShareItem == NULL || m_pShareItem->m_pItem == NULL;  }
 
     operator T*() const
-    { 
-        return m_pShareItem->m_pItem;
-    }
+    {  return m_pShareItem->m_pItem;  }
 
     T* operator-> () const
-    { 
-        return m_pShareItem->m_pItem; 
-    }
+    {  return m_pShareItem->m_pItem;   }
 
+    T* Ptr() 
+    {  return m_pShareItem->m_pItem; }
    
 private:
     ShareItem*  m_pShareItem;

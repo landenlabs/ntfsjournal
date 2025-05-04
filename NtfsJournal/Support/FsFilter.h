@@ -121,7 +121,7 @@ private:
 //  Custom match functions for Journal Records.
 // ------------------------------------------------------------------------------------------------
 
-#include "..\Ntfs.h"
+#include "ntfs.h"
 typedef Ntfs::JournalRecord JRecord;
 
 //

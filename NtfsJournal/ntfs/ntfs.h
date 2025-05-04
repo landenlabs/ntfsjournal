@@ -12,7 +12,8 @@
 #include <vector>
 #include <map>
 
-#include "support\Hnd.h"
+#include "Hnd.h"
+#include "ntfstypes.h"
 
 using namespace std;
 
@@ -28,7 +29,7 @@ public:
     { return m_drive; }
 
     bool IsOpen() const
-    { return m_hnd.IsValid(); }
+    { return m_volHnd.IsValid(); }
 
     void SaveLastError(DWORD error=0) const;
     wstring GetLastErrorMsg() const
@@ -63,9 +64,13 @@ public:
         | USN_REASON_DATA_OVERWRITE
         | USN_REASON_DATA_EXTEND
         | USN_REASON_DATA_TRUNCATION
+        | USN_REASON_EA_CHANGE
+        | USN_REASON_ENCRYPTION_CHANGE
         | USN_REASON_FILE_CREATE
         | USN_REASON_FILE_DELETE
+        | USN_REASON_HARD_LINK_CHANGE
         | USN_REASON_RENAME_OLD_NAME | USN_REASON_RENAME_NEW_NAME 
+        | USN_REASON_SECURITY_CHANGE
         ;
     void SetFilter(UsnFilter = sDefaultFilter);
 
@@ -85,10 +90,10 @@ public:
 
     /// Get NTFS USN Journal records which match filter.
     typedef vector<JournalRecord> JournalList;
-    bool GetJournal(JournalList& list, USN startUsn=0, DWORD filter=0);
+    bool GetJournal(JournalList& list, USN startUsn=0, DWORD filter=0, bool getFileLength=false, bool getFullPath=true);
 
     typedef void (*HandleRecordCb)(JournalRecord& jRec, void* cbData);
-    bool GetJournal(HandleRecordCb, void* cbData, USN startUsn=0, DWORD filter=0);
+    bool GetJournal(HandleRecordCb, void* cbData, USN startUsn=0, DWORD filter=0, bool getFileLength = false, bool getFullPath = true);
 
     static const wchar_t* GetReasonString(DWORD dwReason,  std::wstring& outReasonStr);
     static const wchar_t* GetTimestamp(const LARGE_INTEGER& timestamp, std::wstring& outTimeStr,
@@ -122,11 +127,13 @@ private:
             HandleRecordCb handleCb,
             void* cbData,
             JournalList* pList, 
+            bool getFileSize,
+            bool getFullPath,
             unsigned maxRecords = 100);
 
 private:
 	wchar_t					m_drive;
-    Hnd					    m_hnd;
+    Hnd					    m_volHnd;
 	mutable wstring		    m_errorMsg;
 
     // NTFS USN Journal
