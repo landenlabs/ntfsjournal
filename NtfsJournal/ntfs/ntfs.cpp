@@ -2,7 +2,7 @@
 // Windows NTFS  Journal access class.
 //
 // Author:  Dennis Lang   July-2011
-// https://lanenlabs.com
+// https://landenlabs.com
 // ------------------------------------------------------------------------------------------------
 
 #include <Windows.h>

@@ -3,7 +3,7 @@
 // USN = update sequence number.
 //
 // Author:  Dennis Lang   July-2011
-// https://lanenlabs.com
+// https://landenlabs.com
 // ------------------------------------------------------------------------------------------------
 
 #pragma once

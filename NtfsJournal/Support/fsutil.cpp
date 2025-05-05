@@ -3,7 +3,7 @@
 //
 // Project: NTFSfastFind
 // Author:  Dennis Lang   Apr-2011
-// https://lanenlabs.com
+// https://landenlabs.com
 //
 // ----- License ----
 //
@@ -176,8 +176,6 @@ DWORD FsUtil::GetNtfsDiskNumber(const wchar_t* volumeName, int& diskNumber, LONG
 
 DWORD FsUtil::GetDriveStartSector(const wchar_t* volumeName, DiskInfoList& diskInfoList)
 {
-    int patIdx, nRet;
-
     Hnd hDrive = CreateFile(
         volumeName,                         // "\\\\.\\C:";
         GENERIC_READ | GENERIC_WRITE,
@@ -214,8 +212,8 @@ DWORD FsUtil::GetDriveStartSector(const wchar_t* volumeName, DiskInfoList& diskI
     {
         DiskInfo diskInfo;
         ZeroMemory(&diskInfo, sizeof(diskInfo));
-        diskInfo.dwNTRelativeSector = volumeDiskExtents.Extents[0].StartingOffset.QuadPart / SECTOR_SIZE;
-        diskInfo.dwNumSectors = volumeDiskExtents.Extents[0].ExtentLength.QuadPart / SECTOR_SIZE;  
+        diskInfo.dwNTRelativeSector = (DWORD)(volumeDiskExtents.Extents[0].StartingOffset.QuadPart / SECTOR_SIZE);
+        diskInfo.dwNumSectors = (DWORD)( volumeDiskExtents.Extents[0].ExtentLength.QuadPart / SECTOR_SIZE);  
         diskInfoList.push_back(diskInfo);
     }
     return ERROR_SUCCESS;

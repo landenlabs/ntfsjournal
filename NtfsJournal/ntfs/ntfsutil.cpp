@@ -28,7 +28,7 @@ DWORD ParseReason(const wchar_t* reasons) {
         { L"security",  USN_REASON_SECURITY_CHANGE },
         { L"basic",     USN_REASON_BASIC_INFO_CHANGE },
         { L"link",      USN_REASON_HARD_LINK_CHANGE | USN_REASON_REPARSE_POINT_CHANGE },
-        { L"all", ~0 }
+        { L"all", ~(DWORD)0 }
     };
 
     DWORD filter = 0;

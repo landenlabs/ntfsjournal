@@ -3,7 +3,7 @@
 //
 // Project: NTFSjournal
 // Author:  Dennis Lang   Apr-2011
-// https://lanenlabs.com
+// https://landenlabs.com
 //
 // ----- License ----
 //
@@ -43,7 +43,7 @@ using namespace WinErrHandlers;
 
 #include "ntfsutil.h"   // namespace Ntfs_Journal
 
-#define _VERSION "v3.02"
+#define _VERSION "v3.03"
 
 char sUsage[] =
     "\n"
